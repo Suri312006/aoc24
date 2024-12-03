@@ -11,7 +11,7 @@ enum ReportType {
     Unsafe(usize),
 }
 
-fn check_report(report: Vec<usize>) -> ReportType {
+fn check_report(report: &[usize]) -> ReportType {
     let mut der = None;
 
     for (i, levels) in report.windows(2).enumerate() {
@@ -47,15 +47,10 @@ fn main() {
     for line in input.lines() {
         let report: Vec<usize> = line
             .split_whitespace()
-            .map(|measurement| {
-                measurement
-                    .to_string()
-                    .parse()
-                    .expect("should have been a number")
-            })
+            .map(|measurement| measurement.parse().expect("should have been a number"))
             .collect();
 
-        let report_type = check_report(report.clone());
+        let report_type = check_report(&report);
         match report_type {
             ReportType::Safe => {
                 safe += 1;
@@ -64,14 +59,14 @@ fn main() {
             ReportType::Unsafe(problem_i) => {
                 let mut report_c = report.clone();
                 report_c.remove(problem_i);
-                match check_report(report_c) {
+                match check_report(&report_c) {
                     ReportType::Safe => {
                         fuckup_safe += 1;
                     }
                     ReportType::Unsafe(_) => {
                         let mut report_c = report.clone();
                         report_c.remove(problem_i + 1);
-                        match check_report(report_c) {
+                        match check_report(&report_c) {
                             ReportType::Safe => {
                                 fuckup_safe += 1;
                             }
