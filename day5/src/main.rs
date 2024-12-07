@@ -1,8 +1,23 @@
-use std::{collections::HashMap, fs::read_to_string};
+use std::{cmp::Ordering, collections::HashMap, fs::read_to_string};
 
+enum RuleError {
+    Failed,
+}
 
-fn fix_ordering(rules: HashMap<usize, Vec<usize>>, input: Vec<usize>) -> {
-
+fn rule_check(rules: &HashMap<usize, Vec<usize>>, update: &Vec<usize>) -> Result<(), RuleError> {
+    let mut seen = vec![];
+    for elem in update.iter() {
+        seen.push(elem);
+        if let Some(rule) = rules.get(elem) {
+            for rule_elem in rule {
+                if seen.contains(&rule_elem) {
+                    // need to fix their ordering
+                    return Err(RuleError::Failed);
+                }
+            }
+        }
+    }
+    Ok(())
 }
 
 fn main() {
@@ -36,30 +51,52 @@ fn main() {
     }
 
     let mut total = 0;
-    let mut totalp2 = 0;
-    'updateloop: for update in updates.lines() {
+    let mut erroneous_updates = vec![];
+
+    for update in updates.lines() {
         let update: Vec<usize> = update
             .split(',')
             .map(|elem| elem.parse().expect("should be num"))
             .collect();
+        match rule_check(&rule_map, &update) {
+            Ok(_) => {
+                let len = update.len();
+                let mid = update.get(len / 2).expect("cmon now");
+                total += mid;
+            }
+            Err(_) => {
+                // push to an errors one
+                erroneous_updates.push(update);
+            }
+        }
+    }
 
-        let mut seen = vec![];
-        for elem in update.iter() {
-            seen.push(elem);
-            if let Some(rule) = rule_map.get(elem) {
+    let mut totalp2 = 0;
+    for mut update in erroneous_updates {
+        // we want to organize it properly
+        //NOTE: this is so cool please show adrien
+        update.sort_by(|a, b| {
+            if let Some(rule) = rule_map.get(a) {
                 for rule_elem in rule {
-                    if seen.contains(&rule_elem) {
-                        // need to fix their ordering
-
-                        continue 'updateloop;
+                    if rule_elem == b {
+                        return Ordering::Less;
                     }
                 }
             }
-        }
+            Ordering::Greater
+        });
 
-        let len = update.len();
-        let mid = update.get(len / 2).expect("cmon now");
-        total += mid;
+        match rule_check(&rule_map, &update) {
+            Ok(_) => {
+                let len = update.len();
+                let mid = update.get(len / 2).expect("cmon now");
+                totalp2 += mid;
+            }
+            Err(_) => {
+                panic!("shouldnt have errored lol");
+            }
+        }
     }
     println!("Total (part1): {total}");
+    println!("Total (part2): {totalp2}");
 }
