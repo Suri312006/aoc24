@@ -69,21 +69,18 @@ fn main() {
     }
 
     let mut curr_pos = curr_pos.unwrap();
+    let mut total = 1;
 
-    calculate_movement(&mut map, &mut curr_pos, &mut curr_dir);
-    let mut total = 0;
-    for vec in map {
-        for pix in vec {
-            if pix == Pixel::Visited {
-                total += 1;
-            }
-        }
-    }
-
+    calculate_movement(&mut map, &mut curr_pos, &mut curr_dir, &mut total);
     println!("Total visited (part 1): {total}");
 }
 
-fn calculate_movement(map: &mut Vec<Vec<Pixel>>, curr_pos: &mut Pos, curr_dir: &mut Dir) {
+fn calculate_movement(
+    map: &mut Vec<Vec<Pixel>>,
+    curr_pos: &mut Pos,
+    curr_dir: &mut Dir,
+    curr_total: &mut usize,
+) {
     // should terminate
     if let Some(pix) = curr_dir.next_pixel(curr_pos, map) {
         match pix {
@@ -94,8 +91,8 @@ fn calculate_movement(map: &mut Vec<Vec<Pixel>>, curr_pos: &mut Pos, curr_dir: &
                     .unwrap()
                     .get_mut(curr_pos.x as usize)
                     .unwrap();
-
                 *x = Pixel::Visited;
+                *curr_total += 1;
             }
             Pixel::Obstacle => {
                 // need to move him back && rotate him right
@@ -120,6 +117,6 @@ fn calculate_movement(map: &mut Vec<Vec<Pixel>>, curr_pos: &mut Pos, curr_dir: &
                 // need to rotate them right
             }
         }
-        calculate_movement(map, curr_pos, curr_dir);
+        calculate_movement(map, curr_pos, curr_dir, curr_total);
     }
 }
