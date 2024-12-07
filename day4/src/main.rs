@@ -1,4 +1,4 @@
-use std::{error::Error, fs::read_to_string};
+use std::fs::read_to_string;
 
 #[derive(Copy, Clone)]
 enum Dir {
@@ -126,7 +126,7 @@ fn count_xmas(map: &[Vec<char>], start: Cord) -> usize {
 }
 
 // part2
-#[rustfmt::skip] 
+#[rustfmt::skip]
 fn determine_x_mas(map: &[Vec<char>], start: Cord) -> Option<()> {
     if (
            find_char_around(map, 'M', start, Dir::UL).is_some()
